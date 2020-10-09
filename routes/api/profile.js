@@ -1,12 +1,12 @@
-const express = require('express');
-const router = express.Router();
-const auth = require('../../middleware/auth');
-const { check, validationResult } = require('express-validator');
-const request = require('request');
-const config = require('config');
+import { Router } from 'express';
+const router = Router();
+import auth from '../../middleware/auth';
+import { check, validationResult } from 'express-validator';
+import request from 'request';
+import { get } from 'config';
 
-const Profile = require('../../models/Profile');
-const User = require('../../models/User');
+import Profile from '../../models/Profile';
+import User from '../../models/User';
 
 // @route   GET api/profile/me
 // @desc    Get users profile
@@ -337,9 +337,9 @@ router.get('/github/:username', (req, res) => {
     const options = {
       uri: `https://api.github.com/users/${
         req.params.username
-      }/repos?per_page=5&sort=created:asc&client_id=${config.get(
+      }/repos?per_page=5&sort=created:asc&client_id=${get(
         'githubClientId'
-      )}&client_secret=${config.get('githubClientSecret')}`,
+      )}&client_secret=${get('githubClientSecret')}`,
       method: 'GET',
       headers: { 'user-agent': 'node.js' },
     };
@@ -359,4 +359,4 @@ router.get('/github/:username', (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
