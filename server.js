@@ -1,5 +1,5 @@
-import express, { json } from 'express';
-import connectDB from './config/db';
+const express = require('express');
+const connectDB = require('./config/db');
 const app = express();
 
 app.get('/', (req, res) => res.send('API running'));
@@ -8,7 +8,7 @@ app.get('/', (req, res) => res.send('API running'));
 connectDB();
 
 // Init Middleware
-app.use(json({ extended: false }));
+app.use(express.json({ extended: false }));
 
 // Define routes
 app.use('/api/users', require('./routes/api/users'));

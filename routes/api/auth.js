@@ -1,12 +1,12 @@
-import { Router } from 'express';
-const router = Router();
-import auth from '../../middleware/auth';
-import { sign } from 'jsonwebtoken';
-import { get } from 'config';
-import { compare } from 'bcryptjs';
-import { check, validationResult } from 'express-validator';
+const express = require('express');
+const router = express.Router();
+const auth = require('../../middleware/auth');
+const jwt = require('jsonwebtoken');
+const config = require('config');
+const bcrypt = require('bcryptjs');
+const { check, validationResult } = require('express-validator');
 
-import { findById, findOne } from '../../models/User';
+const User = require('../../models/User');
 
 // @route   GET api/auth
 // @desc    Test route
@@ -14,10 +14,12 @@ import { findById, findOne } from '../../models/User';
 
 router.get('/', auth, async (req, res) => {
   try {
-    const user = await findById(req.user.id).select('-password');
+    console.log(req.body);
+    console.log(req.user.id);
+    const user = await User.findById(req.user.id).select('-password');
     res.json(user);
   } catch (err) {
-    console.log(err.message);
+    console.error(err.message);
     res.status(500).send('Server error');
   }
 });
@@ -30,7 +32,7 @@ router.post(
   '/',
   [
     check('email', 'Please include a valid email address').isEmail(),
-    check('password', 'Please enter a valid password').exists(),
+    check('password', 'Please enter a valid password').exists()
   ],
   async (req, res) => {
     console.log(req.body);
@@ -42,7 +44,7 @@ router.post(
     const { email, password } = req.body;
 
     try {
-      let user = await findOne({ email });
+      let user = await User.findOne({ email });
 
       if (!user) {
         return res
@@ -50,7 +52,7 @@ router.post(
           .json({ errors: [{ msg: 'Invalid credentials.' }] });
       }
 
-      const isMatch = await compare(password, user.password);
+      const isMatch = await bcrypt.compare(password, user.password);
 
       if (!isMatch) {
         return res
@@ -60,13 +62,13 @@ router.post(
 
       const payload = {
         user: {
-          id: user.id,
-        },
+          id: user.id
+        }
       };
 
-      sign(
+      jwt.sign(
         payload,
-        get('jwtSecret'),
+        config.get('jwtSecret'),
         { expiresIn: 3600 },
         (err, token) => {
           if (err) throw err;
@@ -74,10 +76,10 @@ router.post(
         }
       );
     } catch (err) {
-      console.log(err.message);
+      console.error(err.message);
       res.status(500).send('Server error');
     }
   }
 );
 
-export default router;
+module.exports = router;
