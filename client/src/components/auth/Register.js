@@ -1,36 +1,40 @@
 import React, { Fragment, useState } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { setAlert } from '../../actions/alert';
+import PropTypes from 'prop-types';
 
-export const Register = () => {
+const Register = ({ setAlert }) => {
+  // Destructured setAlert from props
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
-    password2: ''
+    password2: '',
   });
 
   const { name, email, password, password2 } = formData;
 
-  const onChange = e =>
+  const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const onSubmit = async e => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     if (password !== password2) {
-      console.log('Passwords do not match');
+      setAlert('Passwords do not match', 'danger');
     } else {
       const newUser = {
         name,
         email,
-        password
+        password,
       };
 
       try {
         const config = {
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         };
 
         const body = JSON.stringify(newUser);
@@ -49,14 +53,14 @@ export const Register = () => {
       <p className='lead'>
         <i className='fas fa-user'></i> Create Your Account
       </p>
-      <form className='form' onSubmit={e => onSubmit(e)}>
+      <form className='form' onSubmit={(e) => onSubmit(e)}>
         <div className='form-group'>
           <input
             type='text'
             placeholder='Name'
             name='name'
             value={name}
-            onChange={e => onChange(e)}
+            onChange={(e) => onChange(e)}
             required
           />
         </div>
@@ -66,7 +70,7 @@ export const Register = () => {
             placeholder='Email Address'
             name='email'
             value={email}
-            onChange={e => onChange(e)}
+            onChange={(e) => onChange(e)}
             required
           />
           <small className='form-text'>
@@ -80,7 +84,7 @@ export const Register = () => {
             placeholder='Password'
             name='password'
             value={password}
-            onChange={e => onChange(e)}
+            onChange={(e) => onChange(e)}
             minLength='6'
           />
         </div>
@@ -90,7 +94,7 @@ export const Register = () => {
             placeholder='Confirm Password'
             name='password2'
             value={password2}
-            onChange={e => onChange(e)}
+            onChange={(e) => onChange(e)}
             minLength='6'
           />
         </div>
@@ -102,3 +106,9 @@ export const Register = () => {
     </Fragment>
   );
 };
+
+Register.propTypes = {
+  setAlert: PropTypes.func.isRequired,
+};
+
+export default connect(null, { setAlert })(Register);
